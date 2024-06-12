@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDS Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0"></script>
+</head>
+<body>
+    <h1>IDS Monitoring Dashboard</h1>
+    <p>Status: Monitoring...</p>
+    
+    <h2>Real-Time CPU Usage</h2>
+    <canvas id="cpuChart" width="400" height="200"></canvas>
+    
+    <h2>Real-Time Memory Usage</h2>
+    <canvas id="memoryChart" width="400" height="200"></canvas>
+    
+    <h2>Detected Anomalies</h2>
+    <ul id="anomalyList"></ul>
+
+    <script>
+        // Initialize CPU and Memory charts
+        const ctxCpu = document.getElementById('cpuChart').getContext('2d');
+        const ctxMemory = document.getElementById('memoryChart').getContext('2d');
+
+        const cpuChart = new Chart(ctxCpu, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'CPU Usage (%)',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Usage (%)'
+                        }
+                    }
+                }
+            }
+        });
+
+        const memoryChart = new Chart(ctxMemory, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Memory Usage (%)',
+                    data: [],
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Usage (%)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Fetch and update data periodically
+        setInterval(() => {
+            fetch('/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    const time = new Date().toLocaleTimeString();
+
+                    // Update CPU chart
+                    cpuChart.data.labels.push(time);
+                    cpuChart.data.datasets[0].data.push(data.cpu);
+                    cpuChart.update();
+
+                    // Update Memory chart
+                    memoryChart.data.labels.push(time);
+                    memoryChart.data.datasets[0].data.push(data.memory);
+                    memoryChart.update();
+
+                    // Update anomalies list
+                    if (data.anomaly) {
+                        const anomalyList = document.getElementById('anomalyList');
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${new Date().toLocaleString()}: ${data.anomaly}`;
+                        anomalyList.appendChild(listItem);
+                    }
+                });
+        }, 1000);
+    </script>
+</body>
+</html>
