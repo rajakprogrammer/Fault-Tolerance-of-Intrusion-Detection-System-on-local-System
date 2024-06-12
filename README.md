@@ -13,3 +13,4 @@ has been developed using the Flask application framework and
 Chart tool as for the purpose of real-time graphic representation
 of various system performance indices, are facility that enable
 users to monitor the status of the entire system
+Here uploaded all file , we can easily follow of this project.
